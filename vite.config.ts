@@ -12,4 +12,6 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Required outside Lovable: produces Vercel-compatible server output on `npm run build`.
+  nitro: { preset: "vercel" },
 });
