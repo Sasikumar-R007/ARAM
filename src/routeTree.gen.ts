@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PortalSymAramX7k2RouteImport } from './routes/portal/sym-aram-x7k2'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalSymAramX7k2Route = PortalSymAramX7k2RouteImport.update({
+  id: '/portal/sym-aram-x7k2',
+  path: '/portal/sym-aram-x7k2',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/portal/sym-aram-x7k2': typeof PortalSymAramX7k2Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/portal/sym-aram-x7k2': typeof PortalSymAramX7k2Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/portal/sym-aram-x7k2': typeof PortalSymAramX7k2Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/portal/sym-aram-x7k2'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/portal/sym-aram-x7k2'
+  id: '__root__' | '/' | '/portal/sym-aram-x7k2'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PortalSymAramX7k2Route: typeof PortalSymAramX7k2Route
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal/sym-aram-x7k2': {
+      id: '/portal/sym-aram-x7k2'
+      path: '/portal/sym-aram-x7k2'
+      fullPath: '/portal/sym-aram-x7k2'
+      preLoaderRoute: typeof PortalSymAramX7k2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PortalSymAramX7k2Route: PortalSymAramX7k2Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

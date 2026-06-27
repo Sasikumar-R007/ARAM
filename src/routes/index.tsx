@@ -1,13 +1,36 @@
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import heroImg from "@/assets/hero.jpg";
 import realityImg from "@/assets/reality.jpg";
 import hopeImg from "@/assets/hope.jpg";
-import careImg from "@/assets/care.jpg";
 import roadImg from "@/assets/road.jpg";
-import aramLogo from "@/assets/aram-logo.png.asset.json";
-import symphonixLogo from "@/assets/symphonix-logo.jpg.asset.json";
+import aramLogoBg from "@/assets/ARAM Logo.png";
+import aramLogoWhite from "@/assets/logo-white.png";
 import { Reveal } from "@/components/Reveal";
 import { ReportDialog, VolunteerDialog } from "@/components/ActionDialogs";
+import { Eye, Smartphone, BellRing, HeartPulse } from "lucide-react";
+
+const CHAPTER_IDS = [
+  "top",
+  "reality",
+  "turning",
+  "solution",
+  "circulation",
+  "impact",
+  "manifesto",
+  "scenarios",
+  "act",
+  "act-final",
+] as const;
+
+/** Sections on paper/cream backgrounds — floating nav uses ink tones */
+const LIGHT_CHAPTERS = new Set<string>([
+  "reality",
+  "solution",
+  "circulation",
+  "manifesto",
+  "scenarios",
+]);
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,50 +54,57 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-function Nav() {
+function Nav({ active }: { active: string }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-10 md:py-5 backdrop-blur-sm">
+    <header className="fixed inset-x-0 top-0 z-50 bg-ink/85 backdrop-blur-md border-b border-paper/10">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-10">
         <a href="#top" className="group flex items-center gap-3">
           <img
-            src={aramLogo.url}
+            src={aramLogoBg}
             alt="ARAM"
-            width={40}
+            width={120}
             height={40}
-            className="h-9 w-9 object-contain invert brightness-0 contrast-100"
-            style={{ filter: "invert(1) brightness(1.6)" }}
+            className="h-9 w-auto object-contain rounded-[4px] transition group-hover:opacity-90"
           />
-          <span className="font-serif text-xl tracking-[0.22em] text-paper">
-            ARAM
-          </span>
-          <span className="hidden h-4 w-px bg-paper/25 md:block" />
-          <span className="hidden font-serif text-xs italic text-paper/55 md:block">
-            அறம்
+          <span className="hidden font-serif text-sm italic text-paper/70 md:block">
+            ARAM | அறம்
           </span>
         </a>
         <nav className="hidden items-center gap-10 md:flex">
           {[
             { l: "Reality", h: "#reality" },
             { l: "The Bridge", h: "#solution" },
+            { l: "The Circle", h: "#circulation" },
             { l: "Impact", h: "#impact" },
             { l: "Manifesto", h: "#manifesto" },
           ].map((i) => (
             <a
               key={i.h}
               href={i.h}
-              className="text-[0.72rem] uppercase tracking-[0.22em] text-paper/70 transition hover:text-gold"
+              className={`text-[0.72rem] uppercase tracking-[0.22em] transition hover:text-gold ${
+                active === i.h.slice(1) ? "text-gold font-semibold" : "text-paper/70"
+              }`}
             >
               {i.l}
             </a>
           ))}
         </nav>
-        <ReportDialog
-          trigger={
-            <button className="rounded-none border border-gold/70 px-4 py-2 text-[0.68rem] uppercase tracking-[0.24em] text-gold transition hover:bg-gold hover:text-ink">
-              Report
-            </button>
-          }
-        />
+        <div className="flex items-center gap-4">
+          <VolunteerDialog
+            trigger={
+              <button className="hidden md:inline-block rounded-sm border border-paper/30 px-4 py-2 text-[0.68rem] uppercase tracking-[0.24em] text-paper transition hover:border-gold hover:text-gold">
+                Volunteer
+              </button>
+            }
+          />
+          <ReportDialog
+            trigger={
+              <button className="btn-interaction rounded-sm bg-gold px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink transition hover:bg-gold-soft">
+                Report
+              </button>
+            }
+          />
+        </div>
       </div>
     </header>
   );
@@ -99,7 +129,7 @@ function Hero() {
             அறம் · A Movement, Not a Product
           </p>
           <h1
-            className="rise-in mt-7 font-serif text-[2.1rem] font-light leading-[1.08] text-paper text-balance md:text-[3.6rem] lg:text-[4.6rem]"
+            className="rise-in mt-7 font-serif text-[2.1rem] font-light leading-[1.15] text-paper text-balance md:text-[3rem] lg:text-[4rem]"
             style={{ animationDelay: "0.25s" }}
           >
             Somewhere tonight,
@@ -121,7 +151,7 @@ function Hero() {
           >
             <ReportDialog
               trigger={
-                <button className="glow-pulse group relative inline-flex items-center gap-4 bg-gold px-7 py-3.5 text-[0.72rem] uppercase tracking-[0.28em] text-ink transition hover:bg-gold-soft hover:-translate-y-0.5">
+                <button className="btn-interaction group relative inline-flex items-center gap-4 rounded-sm bg-gold px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-ink">
                   Report an Animal
                   <span className="inline-block transition group-hover:translate-x-1">→</span>
                 </button>
@@ -142,7 +172,7 @@ function Hero() {
             <span className="hairline">Scroll · The journey begins</span>
           </div>
           <div className="hidden font-serif text-sm italic text-paper/40 md:block">
-            Chapter I — Awareness
+            I
           </div>
         </div>
       </div>
@@ -155,7 +185,7 @@ function Chapter({ n, title }: { n: string; title: string }) {
     <div className="mb-10 flex items-center gap-4 md:mb-14">
       <span className="hairline text-gold">{n}</span>
       <span className="h-px flex-1 bg-foreground/15" />
-      <span className="font-serif text-sm italic text-foreground/50">{title}</span>
+      <span className="font-serif text-base md:text-lg italic text-foreground/50">{title}</span>
     </div>
   );
 }
@@ -184,7 +214,7 @@ function Reality() {
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
               <div className="film-grain absolute inset-0" />
             </div>
-            <p className="mt-4 font-serif text-sm italic text-foreground/55">
+            <p className="mt-5 font-serif text-base md:text-lg italic text-foreground/60">
               Most deaths happen quietly — between two passing headlights.
             </p>
           </Reveal>
@@ -226,7 +256,7 @@ function Reality() {
 
 function Turning() {
   return (
-    <section className="relative overflow-hidden bg-ink py-24 md:py-32">
+    <section id="turning" className="relative overflow-hidden bg-ink py-24 md:py-32">
       <img
         src={roadImg}
         alt=""
@@ -251,7 +281,11 @@ function Turning() {
           </h2>
           <p className="mx-auto mt-10 max-w-2xl text-[0.95rem] leading-relaxed text-paper/65 md:text-base">
             The distance between feeling and acting is where most lives are lost. It is not
-            indifference. It is the absence of a hand to reach for. ARAM is that hand.
+            indifference — it is fear, uncertainty, and not knowing who to call. Especially
+            around accident scenes or animals that seem dangerous, many of us want to help
+            but hesitate to approach. ARAM meets you where you are. You do not have to be
+            the one who touches the animal. A report from the safety of your car, your
+            doorstep, or the sidewalk is still action.
           </p>
         </Reveal>
       </div>
@@ -261,35 +295,36 @@ function Turning() {
 
 function Solution() {
   const steps = [
-    { n: "01", t: "See", d: "Notice an animal hurt, lost, or in danger — anywhere." },
-    { n: "02", t: "Report", d: "Open ARAM. One tap. Photo, location, condition." },
-    { n: "03", t: "Alert", d: "Nearby volunteers, NGOs, and vets are notified instantly." },
-    { n: "04", t: "Rescue", d: "Someone responds. The chain of empathy completes." },
+    { n: "01", t: "See", d: "Notice an animal — hurt, abandoned, hungry, or in danger. From the road, your window, or your daily route.", icon: Eye },
+    { n: "02", t: "Report", d: "Open ARAM. Photo, location, and context — even a quick report from inside your car is enough.", icon: Smartphone },
+    { n: "03", t: "Alert", d: "Nearby volunteers, NGOs, and caretakers in your area are notified.", icon: BellRing },
+    { n: "04", t: "Respond", d: "Someone acts — rescue, feeding, adoption, or connecting the animal to care.", icon: HeartPulse },
   ];
   return (
-    <section id="solution" className="bg-paper py-20 md:py-28">
+    <section id="solution" className="bg-paper py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <Chapter n="IV" title="The Bridge" />
-        <div className="grid gap-12 md:grid-cols-12 md:gap-16">
+        <Chapter n="IV" title="How ARAM Works" />
+        <div className="grid gap-10 md:grid-cols-12 md:items-start md:gap-10">
           <Reveal className="md:col-span-5">
-            <h2 className="font-serif text-3xl font-light leading-[1.1] text-ink text-balance md:text-[2.6rem] lg:text-5xl">
+            <h2 className="font-serif text-3xl font-light leading-[1.15] text-ink text-balance md:text-[2.6rem] lg:text-4xl">
               What if empathy had
               <span className="italic text-gold"> infrastructure?</span>
             </h2>
-            <p className="mt-6 max-w-md text-[0.95rem] leading-relaxed text-foreground/70 md:text-base">
+            <p className="mt-4 text-[0.95rem] leading-[1.55] text-foreground/70 md:text-base">
               ARAM is the quiet network beneath the noise — connecting every witness with
-              someone who can act. No paperwork. No phone trees. Just signal, then response.
+              someone who can act. Not every report is an emergency. Not every volunteer
+              handles accidents. Together, the circle grows.
             </p>
-            <div className="mt-8 hidden md:block relative aspect-[4/3] overflow-hidden shadow-elegant">
+            <div className="relative mt-6 aspect-[3/2] overflow-hidden rounded-sm shadow-elegant">
               <img
-                src={careImg}
-                alt="A pair of hands cradling an injured puppy in warm lamplight"
-                width={1280}
-                height={960}
+                src={hopeImg}
+                alt="A hand reaching toward a stray dog at golden hour — empathy becoming action"
+                width={1600}
+                height={1100}
                 loading="lazy"
-                className="h-full w-full object-cover transition duration-[1200ms] hover:scale-[1.03]"
+                className="h-full w-full object-cover object-[center_35%] transition duration-[1200ms] hover:scale-[1.03]"
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent" />
             </div>
           </Reveal>
           <Reveal className="md:col-span-7" delay={120}>
@@ -297,14 +332,17 @@ function Solution() {
               {steps.map((s, i) => (
                 <li
                   key={s.n}
-                  className="group relative grid grid-cols-[auto_1fr] gap-8 border-t border-foreground/15 py-6 md:py-7 transition hover:bg-cream hover:pl-3"
+                  className="group relative grid grid-cols-[auto_1fr] gap-4 border-t border-foreground/15 py-4 md:py-5 transition hover:bg-cream hover:pl-2"
                 >
-                  <div className="font-serif text-lg text-gold">{s.n}</div>
-                  <div className="flex flex-col gap-2 md:flex-row md:items-baseline md:justify-between md:gap-12">
-                    <h3 className="font-serif text-2xl text-ink md:text-3xl">{s.t}</h3>
-                    <p className="max-w-md text-sm leading-relaxed text-foreground/65">
-                      {s.d}
-                    </p>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/20 bg-paper text-gold shadow-sm transition group-hover:bg-gold/10">
+                    <s.icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 space-y-1">
+                    <h3 className="flex items-center gap-2 font-serif text-xl text-ink md:text-2xl">
+                      <span className="font-sans text-xs text-gold/60">{s.n}</span>
+                      {s.t}
+                    </h3>
+                    <p className="text-sm leading-[1.5] text-foreground/65">{s.d}</p>
                   </div>
                   {i === steps.length - 1 && (
                     <div className="absolute inset-x-0 bottom-0 h-px bg-foreground/15" />
@@ -319,42 +357,185 @@ function Solution() {
   );
 }
 
-function Impact() {
-  const stats = [
-    { n: "12,480", l: "Reports raised" },
-    { n: "8,921", l: "Lives reached in time" },
-    { n: "2,340", l: "Volunteers on the ground" },
-    { n: "187", l: "Partner NGOs & vets" },
+function Circulation() {
+  const reportTypes = [
+    "Injured or accidented animals",
+    "Abandoned puppies on the roadside",
+    "Strays that need regular feeding in an area",
+    "Animals you notice from your car or daily route",
   ];
+
+  const volunteerWays = [
+    "Adopt or foster a puppy in need",
+    "Feed animals daily or once a week nearby",
+    "Spend a day with an organization like Blue Cross",
+    "Arrange shelter, water bowls, or food stations",
+    "Help wounded or disabled animals reach a vet",
+    "Connect animals with caretakers and NGOs",
+  ];
+
+  return (
+    <section id="circulation" className="bg-cream py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-6 md:px-10">
+        <Chapter n="V" title="The Circle of Care" />
+        <Reveal>
+          <div className="grid items-center gap-8 md:grid-cols-12 md:gap-8">
+            <div className="md:col-span-7">
+              <h2 className="font-serif text-3xl font-light leading-[1.1] text-ink text-balance md:text-5xl">
+                Not every act of care looks like
+                <span className="italic text-gold"> a rescue at the scene.</span>
+              </h2>
+              <p className="mt-6 text-[0.95rem] leading-relaxed text-foreground/70 md:text-base">
+                ARAM is built for people who are willing but afraid — who see suffering and
+                freeze at accident sites, who pass dangerous situations and wish someone would
+                help. You do not have to approach what frightens you. Your report is still
+                courage. Your signal still moves the network.
+              </p>
+            </div>
+            <div className="flex justify-center md:col-span-5 md:justify-start md:pl-2">
+              <img
+                src={aramLogoBg}
+                alt="ARAM"
+                width={320}
+                height={320}
+                loading="lazy"
+                className="w-full max-w-[200px] rounded-sm object-contain opacity-90 md:max-w-[240px]"
+              />
+            </div>
+          </div>
+        </Reveal>
+
+        <div className="mt-14 grid gap-px bg-foreground/15 shadow-elegant md:grid-cols-2">
+          <Reveal>
+            <article className="h-full bg-paper p-8 md:p-10">
+              <p className="hairline text-gold">Reports are not only emergencies</p>
+              <h3 className="mt-4 font-serif text-2xl font-light text-ink md:text-3xl">
+                A sighting is enough to start something.
+              </h3>
+              <ul className="mt-6 space-y-3">
+                {reportTypes.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-foreground/70">
+                    <span className="mt-2 h-px w-4 shrink-0 bg-gold/70" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-8 border-l border-gold/60 pl-5 font-serif text-base italic leading-relaxed text-ink/80 md:text-lg">
+                You can report while sitting inside your car. A volunteer nearby reads it
+                and thinks: &ldquo;There are dogs here that need food — I can feed them once a
+                week.&rdquo; Five or six people from the same area may respond, each in their
+                own way.
+              </p>
+            </article>
+          </Reveal>
+          <Reveal delay={120}>
+            <article className="h-full bg-paper p-8 md:p-10">
+              <p className="hairline text-gold">Volunteers contribute in many forms</p>
+              <h3 className="mt-4 font-serif text-2xl font-light text-ink md:text-3xl">
+                You don&apos;t have to handle accidents to belong here.
+              </h3>
+              <ul className="mt-6 space-y-3">
+                {volunteerWays.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-foreground/70">
+                    <span className="mt-2 h-px w-4 shrink-0 bg-gold/70" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-8 border-l border-gold/60 pl-5 font-serif text-base italic leading-relaxed text-ink/80 md:text-lg">
+                This is how ARAM circulates — report by report, act by act — until care
+                becomes normal in a place that once looked away.
+              </p>
+            </article>
+          </Reveal>
+        </div>
+
+        <Reveal delay={180}>
+          <div className="mt-14 border-t border-foreground/15 pt-12 text-center">
+            <p className="hairline text-gold">The movement</p>
+            <p className="mt-4 font-serif text-3xl font-light tracking-wide text-ink md:text-4xl">
+              HELPING THE <span className="italic text-gold">VOICELESS</span>
+            </p>
+            <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-foreground/65 md:text-base">
+              One person reports. Neighbors respond. Food appears. Adoption happens. A
+              wounded animal reaches a caretaker. Hope travels — quietly, steadily, through
+              people who chose not to look away.
+            </p>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Impact() {
+  const pillars = [
+    {
+      title: "One sighting",
+      body: "A puppy on a road you pass every day. One report marks the spot — and neighbours you have never met begin to respond.",
+    },
+    {
+      title: "One signal",
+      body: "From inside your car, without approaching what frightens you. Volunteers who can handle the situation are alerted while you stay safe.",
+    },
+    {
+      title: "One circle",
+      body: "Feeding, adoption, shelter, vet care — each person giving what they can, until a place that looked away learns to care.",
+    },
+  ];
+
   return (
     <section id="impact" className="relative overflow-hidden bg-ink py-20 md:py-28">
       <div className="film-grain absolute inset-0 opacity-50" />
       <div className="relative mx-auto max-w-7xl px-6 md:px-10">
         <div className="mb-10 flex items-center gap-4 md:mb-14">
-          <span className="hairline text-gold">V</span>
+          <span className="hairline text-gold">VI</span>
           <span className="h-px flex-1 bg-paper/20" />
           <span className="font-serif text-sm italic text-paper/50">The Living Proof</span>
         </div>
         <Reveal>
           <h2 className="max-w-4xl font-serif text-3xl font-light leading-[1.1] text-paper text-balance md:text-5xl">
-            Numbers, but each one was once a heartbeat —
-            <span className="italic text-gold-soft"> someone’s reason to keep going.</span>
+            Proof does not always arrive as a number —
+            <span className="italic text-gold-soft"> sometimes it is a chain that begins with you.</span>
           </h2>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-paper/55 md:text-base">
+            ARAM is in its early days. Before dashboards fill with data, this is what one
+            act of conscience can set in motion.
+          </p>
         </Reveal>
-        <div className="mt-14 grid grid-cols-2 gap-px bg-paper/15 md:mt-16 md:grid-cols-4">
-          {stats.map((s, i) => (
-            <Reveal key={s.l} delay={i * 80}>
-              <div className="bg-ink p-7 md:p-9 transition hover:bg-[oklch(0.22_0.008_70)]">
-                <div className="font-serif text-4xl font-light text-paper md:text-5xl">
-                  {s.n}
-                </div>
-                <div className="mt-3 text-[0.7rem] uppercase tracking-[0.22em] text-paper/55">
-                  {s.l}
-                </div>
+        <div className="mt-14 grid gap-px bg-paper/15 md:mt-16 md:grid-cols-3">
+          {pillars.map((p, i) => (
+            <Reveal key={p.title} delay={i * 80}>
+              <div className="flex h-full flex-col bg-ink p-7 md:p-9 transition hover:bg-[oklch(0.22_0.008_70)]">
+                <p className="font-serif text-2xl font-light italic text-gold-soft md:text-3xl">
+                  {p.title}
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-paper/65 md:text-base">
+                  {p.body}
+                </p>
               </div>
             </Reveal>
           ))}
         </div>
+        <Reveal delay={200}>
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-5">
+            <ReportDialog
+              trigger={
+                <button className="btn-interaction inline-flex items-center gap-3 rounded-sm bg-gold px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-ink transition hover:bg-gold-soft">
+                  Be among the first to report
+                  <span>→</span>
+                </button>
+              }
+            />
+            <VolunteerDialog
+              trigger={
+                <button className="btn-interaction inline-flex items-center gap-3 rounded-sm border border-paper/30 px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-paper transition hover:border-gold hover:text-gold">
+                  Pledge as a volunteer
+                </button>
+              }
+            />
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -377,13 +558,13 @@ function Manifesto() {
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/45 via-transparent to-transparent" />
             </div>
-            <p className="mt-4 font-serif text-sm italic text-foreground/55">
+            <p className="mt-5 font-serif text-base md:text-lg italic text-foreground/60">
               The space between two beings — measured not in distance, but in choice.
             </p>
           </div>
         </Reveal>
         <Reveal className="md:col-span-7" delay={120}>
-          <Chapter n="VI" title="Human Responsibility" />
+          <Chapter n="VII" title="Human Responsibility" />
           <h2 className="font-serif text-3xl font-light leading-[1.1] text-ink text-balance md:text-5xl">
             This is not about animals.
             <br />
@@ -419,29 +600,33 @@ function Scenarios() {
   const cards = [
     {
       n: "Scenario I",
-      q: "You see a puppy by a busy road, limping, unable to move further.",
-      a: "Open ARAM. One report sends location to the nearest volunteer within minutes.",
+      q: "You drive past abandoned puppies on the same road every day — you want to help but don't know how.",
+      a: "One ARAM report marks the spot. Nearby volunteers see it — someone adopts, someone feeds weekly, someone connects with a shelter.",
     },
     {
       n: "Scenario II",
-      q: "A bird is tangled in kite string on the terrace next door.",
-      a: "Tag the rescue type — a trained handler is dispatched, not just anyone.",
+      q: "You see an injured animal by a busy road — your heart breaks, but you're afraid to approach.",
+      a: "Report from inside your car. You stay safe. Trained volunteers and NGOs who can handle the situation are alerted.",
     },
     {
       n: "Scenario III",
-      q: "A cow lies near a highway median. Cars swerve. No one stops.",
-      a: "Your single report becomes a coordinated response — police, NGO, vet.",
+      q: "You notice dogs in an area that always look hungry — you can't take them all home, but you care.",
+      a: "A single report lets five or six neighbors respond: daily feeding, water bowls, pods, or reaching a caretaker.",
     },
   ];
   return (
-    <section className="bg-cream py-20 md:py-28">
+    <section id="scenarios" className="bg-cream py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <Chapter n="VII" title="A Quiet Test" />
+        <Chapter n="VIII" title="A Quiet Test" />
         <Reveal>
           <h2 className="max-w-3xl font-serif text-3xl font-light leading-[1.1] text-ink text-balance md:text-5xl">
             What would you do
             <span className="italic text-gold"> if you saw…</span>
           </h2>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-foreground/65 md:text-base">
+            Not every moment demands bravery at the scene. Sometimes the bravest thing is
+            to report — and let the circle of care do the rest.
+          </p>
         </Reveal>
         <div className="mt-12 grid gap-px bg-foreground/15 shadow-elegant md:grid-cols-3">
           {cards.map((c, i) => (
@@ -485,7 +670,7 @@ function Act() {
       />
       <div className="relative mx-auto max-w-7xl px-6 md:px-10">
         <div className="mb-10 flex items-center gap-4 md:mb-14">
-          <span className="hairline text-gold">VIII</span>
+          <span className="hairline text-gold">IX</span>
           <span className="h-px flex-1 bg-paper/20" />
           <span className="font-serif text-sm italic text-paper/50">Take Action</span>
         </div>
@@ -494,6 +679,10 @@ function Act() {
             Two ways to stand
             <span className="italic text-gold-soft"> for the voiceless.</span>
           </h2>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-paper/60 md:text-base">
+            Report what you see — even from a distance. Volunteer in the way that fits
+            your life — rescue, feeding, adoption, or simply showing up.
+          </p>
         </Reveal>
         <div className="mt-12 grid gap-6 md:grid-cols-2 md:gap-px md:bg-paper/10 md:shadow-elegant">
           <Reveal>
@@ -503,21 +692,24 @@ function Act() {
                 Report an Animal
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-paper/65">
-                Photo, location, condition — and the nearest rescuer is alerted.
+                Emergencies, abandonments, or animals that need ongoing care in an area —
+                your sighting helps the network respond.
               </p>
               <ul className="mt-6 space-y-2 text-[0.78rem] text-paper/55">
-                {["Image upload", "Pin or describe location", "Injured · Dead · In danger"].map(
-                  (t) => (
-                    <li key={t} className="flex items-center gap-3">
-                      <span className="h-px w-4 bg-gold/70" />
-                      {t}
-                    </li>
-                  ),
-                )}
+                {[
+                  "Injured · Abandoned · Needs feeding",
+                  "Report from anywhere — even your car",
+                  "Launches soon — register interest now",
+                ].map((t) => (
+                  <li key={t} className="flex items-center gap-3">
+                    <span className="h-px w-4 bg-gold/70" />
+                    {t}
+                  </li>
+                ))}
               </ul>
               <ReportDialog
                 trigger={
-                  <button className="mt-8 inline-flex items-center gap-3 bg-gold px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-ink transition hover:bg-gold-soft group-hover:-translate-y-0.5">
+                  <button className="btn-interaction mt-8 inline-flex items-center gap-3 bg-gold px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-ink transition hover:bg-gold-soft">
                     Open Report
                     <span>→</span>
                   </button>
@@ -532,21 +724,24 @@ function Act() {
                 Become a Volunteer
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-paper/65">
-                Join the quiet network that turns alerts into action.
+                You don&apos;t have to handle accidents. Feed nearby strays, adopt, arrange
+                water and shelter, or connect animals to caretakers — every act counts.
               </p>
               <ul className="mt-6 space-y-2 text-[0.78rem] text-paper/55">
-                {["Name & contact", "Your city or area", "A line about why you'll show up"].map(
-                  (t) => (
-                    <li key={t} className="flex items-center gap-3">
-                      <span className="h-px w-4 bg-gold/70" />
-                      {t}
-                    </li>
-                  ),
-                )}
+                {[
+                  "Feed daily or weekly in your area",
+                  "Adopt, foster, or join NGOs like Blue Cross",
+                  "Help wounded animals reach vets & caretakers",
+                ].map((t) => (
+                  <li key={t} className="flex items-center gap-3">
+                    <span className="h-px w-4 bg-gold/70" />
+                    {t}
+                  </li>
+                ))}
               </ul>
               <VolunteerDialog
                 trigger={
-                  <button className="mt-8 inline-flex items-center gap-3 border border-paper/30 px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-paper transition hover:border-gold hover:text-gold group-hover:-translate-y-0.5">
+                  <button className="btn-interaction mt-8 inline-flex items-center gap-3 border border-paper/30 px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-paper transition hover:border-gold hover:text-gold">
                     Join as Volunteer
                     <span>→</span>
                   </button>
@@ -562,31 +757,35 @@ function Act() {
 
 function FinalCTA() {
   return (
-    <section className="relative overflow-hidden bg-ink py-24 md:py-36">
-      <div className="film-grain absolute inset-0 opacity-60" />
+    <section id="act-final" className="relative overflow-hidden bg-ink py-24 md:py-36">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] opacity-[0.08] blur-[40px] pointer-events-none select-none z-0 mix-blend-screen">
+        <img src={aramLogoWhite} alt="" className="w-full h-auto" />
+      </div>
+      <div className="film-grain absolute inset-0 opacity-60 z-0" />
       <div
-        className="pointer-events-none absolute inset-0 opacity-50"
+        className="pointer-events-none absolute inset-0 opacity-50 z-0"
         style={{
           background:
             "radial-gradient(circle at 50% 50%, oklch(0.74 0.135 78 / 0.18), transparent 60%)",
         }}
       />
-      <div className="relative mx-auto max-w-5xl px-6 text-center md:px-10">
+      <div className="relative z-10 mx-auto max-w-5xl px-6 text-center md:px-10">
         <Reveal>
-          <p className="hairline text-gold">Chapter IX — Your Move</p>
+          <p className="hairline text-gold">X — Your Move</p>
           <h2 className="mt-8 font-serif text-4xl font-light leading-[1.05] text-paper text-balance md:text-6xl lg:text-7xl">
             Be the reason
             <br />
             <span className="italic text-gold-soft">a life is saved.</span>
           </h2>
           <p className="mx-auto mt-8 max-w-xl text-[0.95rem] leading-relaxed text-paper/70 md:text-base">
-            You don’t need to be a rescuer. You don’t need to be brave. You only need to not
-            look away — for the seven seconds it takes to report.
+            You don&apos;t need to be fearless. You don&apos;t need to do everything alone.
+            Report what you see — or volunteer in the way that fits you — and let ARAM
+            circulate hope to the voiceless.
           </p>
           <div className="mt-12 flex flex-wrap items-center justify-center gap-5">
             <ReportDialog
               trigger={
-                <button className="glow-pulse inline-flex items-center gap-4 bg-gold px-9 py-4 text-[0.74rem] uppercase tracking-[0.28em] text-ink transition hover:bg-gold-soft hover:-translate-y-0.5">
+                <button className="btn-interaction inline-flex items-center gap-4 bg-gold px-9 py-4 text-[0.74rem] uppercase tracking-[0.28em] text-ink transition hover:bg-gold-soft">
                   Report an Animal Now
                   <span>→</span>
                 </button>
@@ -594,7 +793,7 @@ function FinalCTA() {
             />
             <VolunteerDialog
               trigger={
-                <button className="border border-paper/30 px-9 py-4 text-[0.74rem] uppercase tracking-[0.28em] text-paper transition hover:border-gold hover:text-gold hover:-translate-y-0.5">
+                <button className="btn-interaction border border-paper/30 px-9 py-4 text-[0.74rem] uppercase tracking-[0.28em] text-paper transition hover:border-gold hover:text-gold">
                   Become a Volunteer
                 </button>
               }
@@ -614,21 +813,17 @@ function Footer() {
     <footer className="border-t border-paper/10 bg-ink">
       <div className="mx-auto max-w-7xl px-6 py-10 md:px-10 md:py-12">
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <img
-              src={aramLogo.url}
+              src={aramLogoBg}
               alt="ARAM"
-              width={36}
-              height={36}
+              width={120}
+              height={40}
               loading="lazy"
-              className="h-9 w-9 object-contain"
-              style={{ filter: "invert(1) brightness(1.6)" }}
+              className="h-10 w-auto object-contain rounded-[4px]"
             />
-            <div>
-              <div className="font-serif text-lg tracking-[0.22em] text-paper">ARAM</div>
-              <div className="font-serif text-[0.72rem] italic text-paper/50">
-                அறம் · righteousness in action
-              </div>
+            <div className="font-serif text-sm md:text-base italic text-paper/60">
+              அறம் · righteousness in action
             </div>
           </div>
           <p className="text-[0.68rem] uppercase tracking-[0.22em] text-paper/55">
@@ -636,41 +831,142 @@ function Footer() {
           </p>
         </div>
 
-        <div className="mt-8 flex flex-col items-start gap-3 border-t border-paper/10 pt-6 md:flex-row md:items-center md:justify-between">
-          <p className="text-[0.68rem] uppercase tracking-[0.28em] text-paper/45">
+        <div className="mt-10 flex flex-col items-center gap-6 border-t border-paper/10 pt-10 pb-4">
+          <div className="font-serif text-[3rem] md:text-[4rem] tracking-widest text-paper/10 leading-none select-none pointer-events-none flex flex-col items-center">
+            ARAM
+            <span className="text-[0.6rem] md:text-[0.7rem] font-sans tracking-[0.4em] uppercase mt-1">For the Voiceless</span>
+          </div>
+          <p className="text-[0.68rem] uppercase tracking-[0.28em] text-paper/45 flex items-center gap-2 mt-4">
             A project by
+            <a href="https://www.symphonixtech.in" target="_blank" rel="noopener noreferrer" className="text-paper/70 font-sans tracking-[0.15em] text-sm hover:text-gold transition-colors ml-1">
+              SYMPHØNIX
+            </a>
           </p>
-          <a
-            href="#"
-            className="group flex items-center gap-3 text-paper/65 transition hover:text-paper"
-          >
-            <img
-              src={symphonixLogo.url}
-              alt="Symphonix"
-              width={28}
-              height={28}
-              loading="lazy"
-              className="h-7 w-7 rounded-sm object-cover grayscale transition group-hover:grayscale-0"
-            />
-            <span className="font-serif text-sm tracking-[0.22em]">SYMPHONIX</span>
-            <span className="hidden font-serif text-[0.7rem] italic text-paper/40 md:inline">
-              Your Vision, Our Expertise
-            </span>
-          </a>
         </div>
       </div>
     </footer>
   );
 }
 
-function Landing() {
+/** Which section sits behind a fixed screen point (used per nav bubble). */
+function sectionBehindY(y: number): string | null {
+  for (const id of CHAPTER_IDS) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    const rect = el.getBoundingClientRect();
+    if (y >= rect.top && y <= rect.bottom) return id;
+  }
+  return null;
+}
+
+function FloatingNav({ active }: { active: string }) {
+  const navRef = useRef<HTMLElement>(null);
+  const [bubbleLight, setBubbleLight] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const syncBubbleThemes = () => {
+      const nav = navRef.current;
+      if (!nav) return;
+
+      const next: Record<string, boolean> = {};
+      nav.querySelectorAll<HTMLAnchorElement>("a[data-chapter]").forEach((link) => {
+        const id = link.dataset.chapter;
+        if (!id) return;
+        const rect = link.getBoundingClientRect();
+        const y = rect.top + rect.height / 2;
+        const behind = sectionBehindY(y);
+        next[id] = LIGHT_CHAPTERS.has(behind ?? id);
+      });
+
+      setBubbleLight(next);
+    };
+
+    window.addEventListener("scroll", syncBubbleThemes, { passive: true });
+    window.addEventListener("resize", syncBubbleThemes);
+    syncBubbleThemes();
+    return () => {
+      window.removeEventListener("scroll", syncBubbleThemes);
+      window.removeEventListener("resize", syncBubbleThemes);
+    };
+  }, []);
+
+  const chapters = CHAPTER_IDS.map((id, i) => ({
+    id,
+    roman: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][i],
+  }));
+
   return (
-    <main className="bg-paper text-ink">
-      <Nav />
+    <nav
+      ref={navRef}
+      aria-label="Chapter navigation"
+      className="fixed left-8 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-5 xl:flex md:left-12"
+    >
+      {chapters.map((c) => {
+        const isActive = active === c.id;
+        const onLight = bubbleLight[c.id] ?? LIGHT_CHAPTERS.has(c.id);
+        const inactiveCls = onLight
+          ? "border-foreground/25 text-foreground/45 hover:border-foreground/50 hover:text-foreground/75"
+          : "border-paper/30 text-paper/50 hover:border-paper/60 hover:text-paper/80";
+
+        return (
+          <a
+            key={c.id}
+            href={`#${c.id}`}
+            data-chapter={c.id}
+            aria-current={isActive ? "true" : undefined}
+            className={`flex h-8 w-8 items-center justify-center rounded-full border font-serif text-[0.6rem] transition-colors duration-300 ${
+              isActive ? "border-gold bg-gold text-ink" : inactiveCls
+            }`}
+          >
+            {c.roman}
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
+
+function Landing() {
+  const [active, setActive] = useState("top");
+  useEffect(() => {
+    const syncActiveChapter = () => {
+      const viewportCenter = window.innerHeight * 0.42;
+      let closestId: (typeof CHAPTER_IDS)[number] = "top";
+      let closestDistance = Infinity;
+
+      for (const id of CHAPTER_IDS) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const sectionCenter = rect.top + rect.height / 2;
+        const distance = Math.abs(sectionCenter - viewportCenter);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestId = id;
+        }
+      }
+
+      setActive(closestId);
+    };
+
+    window.addEventListener("scroll", syncActiveChapter, { passive: true });
+    window.addEventListener("resize", syncActiveChapter);
+    syncActiveChapter();
+    return () => {
+      window.removeEventListener("scroll", syncActiveChapter);
+      window.removeEventListener("resize", syncActiveChapter);
+    };
+  }, []);
+
+  return (
+    <main className="bg-paper text-ink relative">
+      <Nav active={active} />
+      <FloatingNav active={active} />
       <Hero />
       <Reality />
       <Turning />
       <Solution />
+      <Circulation />
       <Impact />
       <Manifesto />
       <Scenarios />
