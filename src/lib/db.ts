@@ -9,6 +9,7 @@ export type Report = {
 
 export type Volunteer = {
   id: string;
+  referenceId: string;
   name: string;
   contact: string;
   location: string;
@@ -20,6 +21,7 @@ export type Volunteer = {
 
 export type NotifySignup = {
   id: string;
+  referenceId: string;
   name: string;
   email: string;
   createdAt: string;

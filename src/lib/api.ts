@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdminSession } from "@/lib/admin/session";
+import { nextReportRefId, nextSupabaseRefId } from "@/lib/admin/refs";
 import { reportStore, type NotifySignup, type Report, type Volunteer } from "./db";
 import { mapNotifySignup, mapVolunteer } from "./supabase/mappers";
 import { getSupabaseAdmin } from "./supabase/server";
@@ -9,7 +10,7 @@ export const submitReport = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const newReport: Report = {
       ...data,
-      id: `rep_${Date.now()}`,
+      id: nextReportRefId(),
       status: "pending",
       createdAt: new Date().toISOString(),
     };
@@ -18,13 +19,15 @@ export const submitReport = createServerFn({ method: "POST" })
   });
 
 export const submitVolunteer = createServerFn({ method: "POST" })
-  .validator((data: Omit<Volunteer, "id" | "status" | "createdAt">) => data)
+  .validator((data: Omit<Volunteer, "id" | "referenceId" | "status" | "createdAt">) => data)
   .handler(async ({ data }) => {
     const supabase = getSupabaseAdmin();
+    const referenceId = await nextSupabaseRefId("volunteers", "AV");
 
     const { data: row, error } = await supabase
       .from("volunteers")
       .insert({
+        reference_id: referenceId,
         name: data.name.trim(),
         contact: data.contact.trim(),
         location: data.location.trim(),
@@ -95,7 +98,7 @@ export const submitNotifySignup = createServerFn({ method: "POST" })
 
     const { data: row, error } = await supabase
       .from("notify_signups")
-      .insert({ name, email })
+      .insert({ name, email, reference_id: await nextSupabaseRefId("notify_signups", "AN") })
       .select()
       .single();
 
