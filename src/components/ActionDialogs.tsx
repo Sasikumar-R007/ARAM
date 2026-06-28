@@ -1,5 +1,5 @@
 import { useState, type ReactNode, type FormEvent } from "react";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { submitNotifySignup, submitVolunteer } from "@/lib/api";
 import {
@@ -15,7 +15,7 @@ import {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-paper/60">
+      <span className="mb-1.5 block text-[0.68rem] uppercase tracking-[0.22em] text-paper/60">
         {label}
       </span>
       {children}
@@ -24,10 +24,28 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 const inputCls =
-  "w-full cursor-text bg-paper/5 border border-paper/20 px-4 py-3 text-sm text-paper placeholder:text-paper/35 focus:border-gold focus:outline-none transition rounded-sm";
+  "w-full cursor-text bg-paper/5 border border-paper/20 px-4 py-2.5 text-sm text-paper placeholder:text-paper/35 focus:border-gold focus:outline-none transition rounded-sm";
+
+const selectCls =
+  "modal-select w-full cursor-pointer appearance-none bg-paper/5 border border-paper/20 px-4 py-3 pr-10 text-sm text-paper focus:border-gold focus:outline-none transition rounded-sm";
 
 const modalShellCls =
-  "max-w-lg border-paper/15 bg-ink text-paper p-0 overflow-hidden shadow-elegant";
+  "border-paper/15 bg-ink text-paper p-0 overflow-hidden shadow-elegant max-sm:!w-[calc(100%-1.5rem)] max-sm:max-h-[min(88vh,720px)] max-sm:overflow-y-auto max-sm:rounded-xl";
+
+const reportModalShellCls =
+  `${modalShellCls} !max-w-[min(42rem,94vw)] sm:!max-w-2xl`;
+
+const volunteerModalShellCls = `${modalShellCls} !max-w-lg`;
+
+const modalBodyCls = "relative p-7 md:p-9 max-sm:p-6 max-sm:pt-10";
+
+const volunteerModalBodyCls = "relative p-6 md:p-7 max-sm:p-6 max-sm:pt-10";
+
+const btnPrimaryCls =
+  "btn-modal flex min-h-[3.25rem] cursor-pointer items-center justify-center gap-2 rounded-sm bg-gold px-3 py-3 text-[0.58rem] font-semibold uppercase tracking-[0.08em] text-ink transition hover:bg-gold-soft sm:px-4 sm:text-[0.62rem] sm:tracking-[0.1em] md:text-[0.65rem] md:tracking-[0.12em]";
+
+const btnOutlineCls =
+  "btn-modal flex min-h-[3.25rem] cursor-pointer items-center justify-center gap-2 rounded-sm border border-paper/30 bg-transparent px-3 py-3 text-[0.58rem] uppercase tracking-[0.08em] text-paper transition hover:border-gold hover:text-gold sm:px-4 sm:text-[0.62rem] sm:tracking-[0.1em] md:text-[0.65rem] md:tracking-[0.12em]";
 
 function ModalGrain() {
   return <div className="film-grain pointer-events-none absolute inset-0 opacity-40" aria-hidden />;
@@ -75,15 +93,15 @@ export function ReportDialog({ trigger }: { trigger: ReactNode }) {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{trigger}</DialogTrigger>
-        <DialogContent className={modalShellCls}>
+        <DialogContent className={reportModalShellCls}>
           <ModalGrain />
-          <div className="relative p-8 md:p-10">
-            <DialogHeader className="text-left">
-              <DialogTitle className="font-serif text-2xl font-light text-paper md:text-3xl">
+          <div className={modalBodyCls}>
+            <DialogHeader className="space-y-3 text-left">
+              <DialogTitle className="font-serif text-2xl font-light leading-tight text-paper md:text-3xl">
                 🐾 Report Animal
               </DialogTitle>
               <DialogDescription asChild>
-                <div className="mt-5 space-y-4 text-sm leading-relaxed text-paper/70 md:text-[0.95rem]">
+                <div className="space-y-3 text-sm leading-relaxed text-paper/70 md:text-[0.95rem]">
                   <p>The ARAM reporting system is currently under development.</p>
                   <p>
                     We are building a fast, reliable way to connect people, volunteers and
@@ -94,24 +112,16 @@ export function ReportDialog({ trigger }: { trigger: ReactNode }) {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={openVolunteer}
-                className="btn-interaction flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm bg-gold px-6 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-ink transition hover:bg-gold-soft"
-              >
+            <div className="mt-7 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <button type="button" onClick={openVolunteer} className={`${btnPrimaryCls} w-full text-center`}>
                 Become a Founding Volunteer
               </button>
-              <button
-                type="button"
-                onClick={openNotify}
-                className="btn-interaction flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm border border-paper/30 bg-transparent px-6 py-3.5 text-[0.72rem] uppercase tracking-[0.24em] text-paper transition hover:border-gold hover:text-gold"
-              >
+              <button type="button" onClick={openNotify} className={`${btnOutlineCls} w-full text-center`}>
                 Notify Me
               </button>
             </div>
 
-            <p className="mt-8 border-t border-paper/10 pt-6 text-center font-serif text-sm italic text-paper/45">
+            <p className="mt-7 border-t border-paper/10 pt-5 text-center font-serif text-sm italic text-paper/45">
               Launching soon. Every report will matter.
             </p>
           </div>
@@ -179,7 +189,7 @@ export function NotifyMeDialog({
       {dialogTrigger && !isControlled ? <DialogTrigger asChild>{dialogTrigger}</DialogTrigger> : null}
       <DialogContent className={modalShellCls}>
         <ModalGrain />
-        <div className="relative p-8 md:p-10">
+        <div className={modalBodyCls}>
           {submitted ? (
             <div className="py-4 text-center">
               <p className="font-serif text-2xl font-light text-paper md:text-3xl">
@@ -318,24 +328,24 @@ export function VolunteerDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {dialogTrigger && !isControlled ? <DialogTrigger asChild>{dialogTrigger}</DialogTrigger> : null}
-      <DialogContent className={modalShellCls}>
+      <DialogContent className={volunteerModalShellCls}>
         <ModalGrain />
-        <div className="relative p-8 md:p-10">
-          <DialogHeader className="text-left">
+        <div className={volunteerModalBodyCls}>
+          <DialogHeader className="space-y-2 text-left">
             <p className="hairline text-gold">
               {founding ? "Founding Volunteer" : "Become a Volunteer"}
             </p>
-            <DialogTitle className="font-serif text-2xl font-light text-paper md:text-3xl">
+            <DialogTitle className="font-serif text-xl font-light leading-snug text-paper md:text-2xl">
               {founding ? "Help us build ARAM from day one." : "Stand for the silent."}
             </DialogTitle>
-            <DialogDescription className="text-paper/60 text-sm">
+            <DialogDescription className="text-[0.72rem] leading-relaxed text-paper/50 md:text-xs">
               {founding
                 ? "Register your interest now. When ARAM launches, founding volunteers will be the first to respond."
                 : "Join the quiet network of people who respond when no one else does."}
             </DialogDescription>
           </DialogHeader>
 
-          <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+          <form className="mt-4 space-y-3.5" onSubmit={handleSubmit}>
             <Field label="Full Name">
               <input
                 className={inputCls}
@@ -377,31 +387,31 @@ export function VolunteerDialog({
               </div>
             </Field>
             <Field label="Availability">
-              <select
-                className={inputCls + " cursor-pointer appearance-none text-paper"}
-                value={availability}
-                onChange={(e) =>
-                  setAvailability(e.target.value as "weekdays" | "weekends" | "anytime" | "")
-                }
-                required
-              >
-                <option value="" disabled hidden>
-                  Select availability
-                </option>
-                <option value="weekdays" className="bg-ink text-paper">
-                  Weekdays
-                </option>
-                <option value="weekends" className="bg-ink text-paper">
-                  Weekends
-                </option>
-                <option value="anytime" className="bg-ink text-paper">
-                  Anytime / Emergency
-                </option>
-              </select>
+              <div className="relative">
+                <select
+                  className={selectCls}
+                  value={availability}
+                  onChange={(e) =>
+                    setAvailability(e.target.value as "weekdays" | "weekends" | "anytime" | "")
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select availability
+                  </option>
+                  <option value="weekdays">Weekdays</option>
+                  <option value="weekends">Weekends</option>
+                  <option value="anytime">Anytime / Emergency</option>
+                </select>
+                <ChevronDown
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gold/70"
+                  aria-hidden
+                />
+              </div>
             </Field>
             <Field label="Why you want to help (optional)">
               <textarea
-                rows={3}
+                rows={2}
                 className={inputCls + " resize-none"}
                 placeholder="A line about you"
                 value={reason}
@@ -409,11 +419,11 @@ export function VolunteerDialog({
               />
             </Field>
 
-            <DialogFooter className="!justify-stretch">
+            <DialogFooter className="!justify-stretch pt-1">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-interaction flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm bg-gold px-6 py-3 text-[0.74rem] font-semibold uppercase tracking-[0.26em] text-ink disabled:opacity-70 disabled:hover:scale-100"
+                className={`${btnPrimaryCls} w-full disabled:opacity-70`}
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

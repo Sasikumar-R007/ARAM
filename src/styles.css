@@ -187,6 +187,12 @@
   height: 1px;
 }
 
+@utility hero-vignette-light {
+  background:
+    radial-gradient(ellipse at 30% 40%, transparent 0%, oklch(0.12 0.008 70 / 0.35) 55%, oklch(0.10 0.006 70 / 0.72) 100%),
+    linear-gradient(180deg, oklch(0.14 0.008 70 / 0.35) 0%, oklch(0.10 0.006 70 / 0.35) 55%, oklch(0.10 0.006 70 / 0.82) 100%);
+}
+
 @utility hero-vignette {
   background:
     radial-gradient(ellipse at 30% 40%, transparent 0%, oklch(0.12 0.008 70 / 0.55) 55%, oklch(0.10 0.006 70 / 0.92) 100%),
@@ -257,6 +263,28 @@
   box-shadow:
     0 1px 0 0 oklch(0.74 0.135 78 / 0.08),
     0 24px 60px -28px oklch(0.18 0.008 70 / 0.45);
+}
+
+@utility btn-nowrap {
+  white-space: nowrap;
+}
+
+@utility btn-modal {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, opacity 0.25s ease;
+}
+.btn-modal:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.modal-select option {
+  padding: 0.625rem 0.875rem;
+  background-color: oklch(0.18 0.008 70);
+  color: oklch(0.948 0.012 80);
+}
+
+.modal-select:focus {
+  border-color: var(--gold);
 }
 
 @utility btn-interaction {

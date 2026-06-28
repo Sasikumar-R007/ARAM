@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import heroImg from "@/assets/hero.jpg";
+import heroImg2 from "@/assets/hero-v2.jpg";
+import heroImg3 from "@/assets/hero-v3.jpg";
+import heroImg4 from "@/assets/hero-v4.jpg";
 import realityImg from "@/assets/reality.jpg";
 import hopeImg from "@/assets/hope.jpg";
 import roadImg from "@/assets/road.jpg";
@@ -8,7 +11,10 @@ import aramLogoBg from "@/assets/ARAM Logo.png";
 import aramLogoWhite from "@/assets/logo-white.png";
 import { Reveal } from "@/components/Reveal";
 import { ReportDialog, VolunteerDialog } from "@/components/ActionDialogs";
-import { Eye, Smartphone, BellRing, HeartPulse } from "lucide-react";
+import { Eye, Smartphone, BellRing, HeartPulse, Megaphone, ArrowUp, Heart } from "lucide-react";
+
+const HERO_IMAGES = [heroImg, heroImg2, heroImg3, heroImg4] as const;
+const HERO_CYCLE_MS = 7000;
 
 const CHAPTER_IDS = [
   "top",
@@ -57,7 +63,7 @@ export const Route = createFileRoute("/")({
 function Nav({ active }: { active: string }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-ink/85 backdrop-blur-md border-b border-paper/10">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-10">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4 md:px-10">
         <a href="#top" className="group flex items-center gap-3">
           <img
             src={aramLogoBg}
@@ -89,18 +95,24 @@ function Nav({ active }: { active: string }) {
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <VolunteerDialog
             trigger={
-              <button className="hidden md:inline-block rounded-sm border border-paper/30 px-4 py-2 text-[0.68rem] uppercase tracking-[0.24em] text-paper transition hover:border-gold hover:text-gold">
+              <button className="btn-nowrap rounded-sm border border-paper/30 px-3 py-2 text-[0.62rem] uppercase tracking-[0.16em] text-paper transition hover:border-gold hover:text-gold sm:px-4 sm:text-[0.68rem] sm:tracking-[0.24em]">
                 Volunteer
               </button>
             }
           />
           <ReportDialog
             trigger={
-              <button className="btn-interaction rounded-sm bg-gold px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-ink transition hover:bg-gold-soft">
-                Report
+              <button
+                className="btn-interaction flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gold text-ink transition hover:bg-gold-soft sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+                aria-label="Report an animal"
+              >
+                <Megaphone className="h-4 w-4 sm:hidden" aria-hidden />
+                <span className="btn-nowrap hidden sm:inline text-[0.68rem] font-semibold uppercase tracking-[0.24em]">
+                  Report
+                </span>
               </button>
             }
           />
@@ -110,22 +122,52 @@ function Nav({ active }: { active: string }) {
   );
 }
 
+function HeroBackground() {
+  const [active, setActive] = useState(0);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(true);
+    const timer = window.setInterval(() => {
+      setActive((i) => (i + 1) % HERO_IMAGES.length);
+    }, HERO_CYCLE_MS);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const visible = ready ? active : 0;
+
+  return (
+    <div className="absolute inset-0" aria-hidden>
+      {HERO_IMAGES.map((src, i) => (
+        <img
+          key={`hero-bg-${i}`}
+          suppressHydrationWarning
+          src={src}
+          alt=""
+          width={1920}
+          height={1280}
+          className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-[2200ms] ease-in-out ${
+            i === visible ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
 function Hero() {
   return (
     <section id="top" className="relative isolate min-h-screen overflow-hidden bg-ink">
-      <img
-        src={heroImg}
-        alt="A stray dog beneath a lone streetlamp at dusk on a rain-slick road"
-        width={1920}
-        height={1280}
-        className="absolute inset-0 h-full w-full object-cover opacity-90"
-      />
-      <div className="hero-vignette absolute inset-0" />
+      <HeroBackground />
+      <div className="hero-vignette-light absolute inset-0" />
       <div className="film-grain absolute inset-0" />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col justify-between px-6 pt-32 pb-16 md:px-10 md:pt-40 md:pb-20">
         <div className="max-w-3xl">
-          <p className="hairline rise-in text-gold" style={{ animationDelay: "0.1s" }}>
+          <p
+            className="hairline rise-in inline-block rounded-sm border border-paper/15 bg-ink/50 px-4 py-2.5 text-gold backdrop-blur-md max-sm:text-[0.62rem] max-sm:tracking-[0.14em]"
+            style={{ animationDelay: "0.1s" }}
+          >
             அறம் · A Movement, Not a Product
           </p>
           <h1
@@ -151,7 +193,7 @@ function Hero() {
           >
             <ReportDialog
               trigger={
-                <button className="btn-interaction group relative inline-flex items-center gap-4 rounded-sm bg-gold px-7 py-3.5 text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-ink">
+                <button className="btn-interaction btn-nowrap group relative inline-flex items-center gap-3 rounded-sm bg-gold px-5 py-3.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-ink sm:gap-4 sm:px-7 sm:text-[0.72rem] sm:tracking-[0.28em]">
                   Report an Animal
                   <span className="inline-block transition group-hover:translate-x-1">→</span>
                 </button>
@@ -169,7 +211,11 @@ function Hero() {
         <div className="rise-in mt-16 flex items-end justify-between gap-8" style={{ animationDelay: "1s" }}>
           <div className="flex items-center gap-3 text-paper/50">
             <span className="h-px w-10 bg-gold" />
-            <span className="hairline">Scroll · The journey begins</span>
+            <span className="hairline max-sm:text-[0.62rem] max-sm:tracking-[0.14em] max-sm:leading-snug">
+              <span className="block sm:inline">Scroll</span>
+              <span className="hidden sm:inline"> · </span>
+              <span className="block sm:inline">The journey begins</span>
+            </span>
           </div>
           <div className="hidden font-serif text-sm italic text-paper/40 md:block">
             I
@@ -399,7 +445,7 @@ function Circulation() {
                 width={320}
                 height={320}
                 loading="lazy"
-                className="w-full max-w-[200px] rounded-sm object-contain opacity-90 md:max-w-[240px]"
+                className="w-full max-w-[200px] rounded-2xl object-contain opacity-90 md:max-w-[240px]"
               />
             </div>
           </div>
@@ -521,7 +567,7 @@ function Impact() {
           <div className="mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-5">
             <ReportDialog
               trigger={
-                <button className="btn-interaction inline-flex items-center gap-3 rounded-sm bg-gold px-6 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-ink transition hover:bg-gold-soft">
+                <button className="btn-interaction btn-nowrap inline-flex items-center gap-2 rounded-sm bg-gold px-4 py-3 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-ink transition hover:bg-gold-soft sm:gap-3 sm:px-6 sm:text-[0.72rem] sm:tracking-[0.26em]">
                   Be among the first to report
                   <span>→</span>
                 </button>
@@ -529,7 +575,7 @@ function Impact() {
             />
             <VolunteerDialog
               trigger={
-                <button className="btn-interaction inline-flex items-center gap-3 rounded-sm border border-paper/30 px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-paper transition hover:border-gold hover:text-gold">
+                <button className="btn-interaction btn-nowrap inline-flex items-center gap-2 rounded-sm border border-paper/30 px-4 py-3 text-[0.62rem] uppercase tracking-[0.16em] text-paper transition hover:border-gold hover:text-gold sm:gap-3 sm:px-6 sm:text-[0.72rem] sm:tracking-[0.26em]">
                   Pledge as a volunteer
                 </button>
               }
@@ -709,7 +755,7 @@ function Act() {
               </ul>
               <ReportDialog
                 trigger={
-                  <button className="btn-interaction mt-8 inline-flex items-center gap-3 bg-gold px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-ink transition hover:bg-gold-soft">
+                  <button className="btn-interaction btn-nowrap mt-8 inline-flex items-center gap-2 bg-gold px-4 py-3 text-[0.62rem] uppercase tracking-[0.16em] text-ink transition hover:bg-gold-soft sm:gap-3 sm:px-6 sm:text-[0.72rem] sm:tracking-[0.26em]">
                     Open Report
                     <span>→</span>
                   </button>
@@ -741,7 +787,7 @@ function Act() {
               </ul>
               <VolunteerDialog
                 trigger={
-                  <button className="btn-interaction mt-8 inline-flex items-center gap-3 border border-paper/30 px-6 py-3 text-[0.72rem] uppercase tracking-[0.26em] text-paper transition hover:border-gold hover:text-gold">
+                  <button className="btn-interaction btn-nowrap mt-8 inline-flex items-center gap-2 border border-paper/30 px-4 py-3 text-[0.62rem] uppercase tracking-[0.16em] text-paper transition hover:border-gold hover:text-gold sm:gap-3 sm:px-6 sm:text-[0.72rem] sm:tracking-[0.26em]">
                     Join as Volunteer
                     <span>→</span>
                   </button>
@@ -757,7 +803,7 @@ function Act() {
 
 function FinalCTA() {
   return (
-    <section id="act-final" className="relative overflow-hidden bg-ink py-24 md:py-36">
+    <section id="act-final" className="relative overflow-hidden bg-ink pt-24 pb-14 md:pt-36 md:pb-20">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] opacity-[0.08] blur-[40px] pointer-events-none select-none z-0 mix-blend-screen">
         <img src={aramLogoWhite} alt="" className="w-full h-auto" />
       </div>
@@ -785,7 +831,7 @@ function FinalCTA() {
           <div className="mt-12 flex flex-wrap items-center justify-center gap-5">
             <ReportDialog
               trigger={
-                <button className="btn-interaction inline-flex items-center gap-4 bg-gold px-9 py-4 text-[0.74rem] uppercase tracking-[0.28em] text-ink transition hover:bg-gold-soft">
+                <button className="btn-interaction btn-nowrap inline-flex items-center gap-2 rounded-sm bg-gold px-4 py-3 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-ink transition hover:bg-gold-soft sm:gap-3 sm:px-6 sm:text-[0.72rem] sm:tracking-[0.26em]">
                   Report an Animal Now
                   <span>→</span>
                 </button>
@@ -793,7 +839,7 @@ function FinalCTA() {
             />
             <VolunteerDialog
               trigger={
-                <button className="btn-interaction border border-paper/30 px-9 py-4 text-[0.74rem] uppercase tracking-[0.28em] text-paper transition hover:border-gold hover:text-gold">
+                <button className="btn-interaction btn-nowrap inline-flex items-center gap-2 rounded-sm border border-paper/30 px-4 py-3 text-[0.62rem] uppercase tracking-[0.16em] text-paper transition hover:border-gold hover:text-gold sm:gap-3 sm:px-9 sm:py-4 sm:text-[0.74rem] sm:tracking-[0.28em]">
                   Become a Volunteer
                 </button>
               }
@@ -803,6 +849,15 @@ function FinalCTA() {
             “The measure of a civilization is how it treats its weakest members.” — Mahatma Gandhi
           </p>
         </Reveal>
+        <Reveal delay={120}>
+          <p className="mt-5 flex items-center justify-center gap-2 font-serif text-base italic text-paper/45">
+            <span>Start your</span>
+            <span className="cursor-default text-gold/75 transition-colors duration-300 hover:text-gold">
+              #ARAMmoment
+            </span>
+            <Heart className="h-4 w-4 shrink-0 fill-gold text-gold" aria-hidden />
+          </p>
+        </Reveal>
       </div>
     </section>
   );
@@ -810,7 +865,7 @@ function FinalCTA() {
 
 function Footer() {
   return (
-    <footer className="border-t border-paper/10 bg-ink">
+    <footer id="site-footer" className="border-t border-paper/10 bg-ink">
       <div className="mx-auto max-w-7xl px-6 py-10 md:px-10 md:py-12">
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <div className="flex items-center gap-4">
@@ -826,8 +881,10 @@ function Footer() {
               அறம் · righteousness in action
             </div>
           </div>
-          <p className="text-[0.68rem] uppercase tracking-[0.22em] text-paper/55">
-            © {new Date().getFullYear()} ARAM Movement · Built with conscience
+          <p className="text-[0.62rem] uppercase tracking-[0.16em] text-paper/55 sm:text-[0.68rem] sm:tracking-[0.22em]">
+            <span className="block sm:inline">© {new Date().getFullYear()} ARAM Movement</span>
+            <span className="hidden sm:inline"> · </span>
+            <span className="block sm:mt-0 mt-1 sm:inline">Built with conscience</span>
           </p>
         </div>
 
@@ -849,14 +906,49 @@ function Footer() {
 }
 
 /** Which section sits behind a fixed screen point (used per nav bubble). */
-function sectionBehindY(y: number): string | null {
+function isBubbleOnLightBg(y: number): boolean {
+  const footer = document.getElementById("site-footer");
+  if (footer) {
+    const fr = footer.getBoundingClientRect();
+    if (y >= fr.top && y <= fr.bottom) return false;
+  }
+
   for (const id of CHAPTER_IDS) {
     const el = document.getElementById(id);
     if (!el) continue;
     const rect = el.getBoundingClientRect();
-    if (y >= rect.top && y <= rect.bottom) return id;
+    if (y >= rect.top && y <= rect.bottom) return LIGHT_CHAPTERS.has(id);
   }
-  return null;
+
+  return false;
+}
+
+function ScrollToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 480);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <button
+      type="button"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Back to top"
+      aria-hidden={!visible}
+      tabIndex={visible ? 0 : -1}
+      className={`fixed bottom-5 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-gold/45 bg-ink/90 text-gold shadow-elegant backdrop-blur-sm transition-all duration-500 ease-out hover:border-gold hover:bg-gold hover:text-ink sm:bottom-8 sm:right-8 ${
+        visible
+          ? "pointer-events-auto translate-y-0 opacity-100"
+          : "pointer-events-none translate-y-3 opacity-0"
+      }`}
+    >
+      <ArrowUp className="h-5 w-5" aria-hidden />
+    </button>
+  );
 }
 
 function FloatingNav({ active }: { active: string }) {
@@ -874,8 +966,7 @@ function FloatingNav({ active }: { active: string }) {
         if (!id) return;
         const rect = link.getBoundingClientRect();
         const y = rect.top + rect.height / 2;
-        const behind = sectionBehindY(y);
-        next[id] = LIGHT_CHAPTERS.has(behind ?? id);
+        next[id] = isBubbleOnLightBg(y);
       });
 
       setBubbleLight(next);
@@ -905,8 +996,8 @@ function FloatingNav({ active }: { active: string }) {
         const isActive = active === c.id;
         const onLight = bubbleLight[c.id] ?? LIGHT_CHAPTERS.has(c.id);
         const inactiveCls = onLight
-          ? "border-foreground/25 text-foreground/45 hover:border-foreground/50 hover:text-foreground/75"
-          : "border-paper/30 text-paper/50 hover:border-paper/60 hover:text-paper/80";
+          ? "border-ink/55 text-ink/80 bg-paper/60 shadow-sm hover:border-ink/75 hover:text-ink hover:bg-paper/80"
+          : "border-paper/40 text-paper/65 hover:border-paper/70 hover:text-paper/90";
 
         return (
           <a
@@ -928,6 +1019,7 @@ function FloatingNav({ active }: { active: string }) {
 
 function Landing() {
   const [active, setActive] = useState("top");
+
   useEffect(() => {
     const syncActiveChapter = () => {
       const viewportCenter = window.innerHeight * 0.42;
@@ -962,6 +1054,7 @@ function Landing() {
     <main className="bg-paper text-ink relative">
       <Nav active={active} />
       <FloatingNav active={active} />
+      <ScrollToTop />
       <Hero />
       <Reality />
       <Turning />
