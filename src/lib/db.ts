@@ -13,7 +13,7 @@ export type Volunteer = {
   name: string;
   contact: string;
   location: string;
-  availability: "weekdays" | "weekends" | "anytime";
+  availability: "weekdays" | "weekends" | "anytime" | null;
   reason: string;
   status: "active" | "inactive";
   createdAt: string;

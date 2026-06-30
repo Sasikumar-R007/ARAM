@@ -31,7 +31,7 @@ export const submitVolunteer = createServerFn({ method: "POST" })
         name: data.name.trim(),
         contact: data.contact.trim(),
         location: data.location.trim(),
-        availability: data.availability,
+        availability: data.availability ?? null,
         reason: data.reason?.trim() ?? "",
         status: "active",
       })

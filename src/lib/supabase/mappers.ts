@@ -6,7 +6,7 @@ type VolunteerRow = {
   name: string;
   contact: string;
   location: string;
-  availability: Volunteer["availability"];
+  availability: Volunteer["availability"] | null;
   reason: string;
   status: Volunteer["status"];
   created_at: string;

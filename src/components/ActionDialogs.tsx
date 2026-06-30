@@ -1,5 +1,5 @@
 import { useState, type ReactNode, type FormEvent } from "react";
-import { MapPin, Loader2, ChevronDown } from "lucide-react";
+import { MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { submitNotifySignup, submitVolunteer } from "@/lib/api";
 import {
@@ -26,8 +26,8 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 const inputCls =
   "w-full cursor-text bg-paper/5 border border-paper/20 px-4 py-2.5 text-sm text-paper placeholder:text-paper/35 focus:border-gold focus:outline-none transition rounded-sm";
 
-const selectCls =
-  "modal-select w-full cursor-pointer appearance-none bg-paper/5 border border-paper/20 px-4 py-3 pr-10 text-sm text-paper focus:border-gold focus:outline-none transition rounded-sm";
+// const selectCls =
+//   "modal-select w-full cursor-pointer appearance-none bg-paper/5 border border-paper/20 px-4 py-3 pr-10 text-sm text-paper focus:border-gold focus:outline-none transition rounded-sm";
 
 const modalShellCls =
   "border-paper/15 bg-ink text-paper p-0 overflow-hidden shadow-elegant max-sm:!w-[calc(100%-1.5rem)] max-sm:max-h-[min(88vh,720px)] max-sm:overflow-y-auto max-sm:rounded-xl";
@@ -278,7 +278,8 @@ export function VolunteerDialog({
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [location, setLocation] = useState("");
-  const [availability, setAvailability] = useState<"weekdays" | "weekends" | "anytime" | "">("");
+  // Hidden for now — re-enable when we ask volunteers for availability during onboarding.
+  // const [availability, setAvailability] = useState<"weekdays" | "weekends" | "anytime" | "">("");
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -289,7 +290,7 @@ export function VolunteerDialog({
         setName("");
         setContact("");
         setLocation("");
-        setAvailability("");
+        // setAvailability("");
         setReason("");
       }, 300);
     }
@@ -297,7 +298,7 @@ export function VolunteerDialog({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !contact.trim() || !location.trim() || !availability) {
+    if (!name.trim() || !contact.trim() || !location.trim()) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -308,7 +309,7 @@ export function VolunteerDialog({
           name,
           contact,
           location,
-          availability: availability as "weekdays" | "weekends" | "anytime",
+          availability: null,
           reason,
         },
       });
@@ -386,6 +387,10 @@ export function VolunteerDialog({
                 </button>
               </div>
             </Field>
+            {/*
+              Availability — hidden during early sign-up so registration feels low-pressure.
+              Re-enable this block when we collect scheduling preferences post-launch.
+
             <Field label="Availability">
               <div className="relative">
                 <select
@@ -394,7 +399,6 @@ export function VolunteerDialog({
                   onChange={(e) =>
                     setAvailability(e.target.value as "weekdays" | "weekends" | "anytime" | "")
                   }
-                  required
                 >
                   <option value="" disabled>
                     Select availability
@@ -409,6 +413,7 @@ export function VolunteerDialog({
                 />
               </div>
             </Field>
+            */}
             <Field label="Why you want to help (optional)">
               <textarea
                 rows={2}

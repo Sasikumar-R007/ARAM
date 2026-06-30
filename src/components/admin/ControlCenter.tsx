@@ -125,7 +125,7 @@ export function ControlCenter({ adminEmail }: { adminEmail: string }) {
           v.name,
           v.contact,
           v.location,
-          v.availability,
+          v.availability ?? "—",
         ],
         detail: v.reason || undefined,
       })) ?? [],
